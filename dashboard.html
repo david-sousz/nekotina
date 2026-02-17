@@ -9,14 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; }
-        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); transition: 0.3s; }
-        .glass-card:hover { border-color: rgba(157, 78, 221, 0.3); transform: translateY(-2px); }
+        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
         .sidebar { background: #080808; border-right: 1px solid #151515; }
     </style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen">
 
-    <!-- Script de Proteção de Rota - Executa antes de carregar o HTML -->
+    <!-- Proteção de Rota -->
     <script>
         const session = localStorage.getItem('nekotina_session');
         if (!session) {
@@ -36,48 +35,47 @@
 
         <nav class="space-y-2 flex-1">
             <a href="#" class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 text-purple-400 font-bold">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i> Início
+                <i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard
             </a>
             <a href="#" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
-                <i data-lucide="settings" class="w-5 h-5"></i> Perfil/Senha
+                <i data-lucide="settings" class="w-5 h-5"></i> Configurações
             </a>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5">
             <div class="bg-white/5 p-4 rounded-2xl mb-4">
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Plano Restante</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tempo de Plano</p>
                 <p id="timer" class="text-lg font-mono font-bold text-purple-500 mt-1">Calculando...</p>
             </div>
             <button onclick="logout()" class="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-red-500 hover:bg-red-500/10 transition-all font-semibold">
-                <i data-lucide="log-out" class="w-5 h-5"></i> Sair do Painel
+                <i data-lucide="log-out" class="w-5 h-5"></i> Sair
             </button>
         </div>
     </aside>
 
-    <!-- Content -->
+    <!-- Conteúdo -->
     <main class="flex-1 p-6 md:p-12 overflow-y-auto">
         <header class="mb-12">
             <div class="flex items-center gap-2 mb-2">
                 <span class="bg-green-500/10 text-green-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-green-500/20">Ativo</span>
             </div>
-            <h2 class="text-4xl font-extrabold text-white">Olá, <span id="user-display-name" class="text-purple-500">Grupo</span>!</h2>
+            <h2 class="text-4xl font-extrabold text-white">Bem-vindo, <span id="user-display-name" class="text-purple-500">Grupo</span>!</h2>
             <p id="user-display-id" class="text-gray-500 text-sm mt-2 font-mono">ID: ...</p>
         </header>
 
-        <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="glass-card p-8 rounded-[32px]">
                 <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 mb-6">
                     <i data-lucide="credit-card"></i>
                 </div>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Modalidade</p>
-                <h3 id="plano-txt" class="text-2xl font-bold mt-1">Carregando...</h3>
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Plano Ativo</p>
+                <h3 id="plano-txt" class="text-2xl font-bold mt-1">...</h3>
             </div>
             <div class="glass-card p-8 rounded-[32px]">
                 <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6">
                     <i data-lucide="activity"></i>
                 </div>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Status do Bot</p>
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Status Bot</p>
                 <h3 class="text-2xl font-bold mt-1 text-green-500">Operacional</h3>
             </div>
             <div class="glass-card p-8 rounded-[32px]">
@@ -89,30 +87,25 @@
             </div>
         </div>
 
-        <!-- Info Table -->
         <div class="mt-10 glass-card p-10 rounded-[40px]">
             <h4 class="text-xl font-bold mb-8 flex items-center gap-3">
-                <i data-lucide="database" class="text-purple-500 w-5 h-5"></i> Dados do Sistema
+                <i data-lucide="database" class="text-purple-500 w-5 h-5"></i> Dados do Grupo
             </h4>
             <div class="space-y-6">
                 <div class="flex justify-between items-center py-4 border-b border-white/5">
-                    <span class="text-gray-500 font-medium">Endereço do Grupo</span>
+                    <span class="text-gray-500 font-medium">ID do Grupo</span>
                     <span class="font-mono text-sm bg-white/5 px-3 py-1 rounded-lg" id="full-id">---</span>
                 </div>
                 <div class="flex justify-between items-center py-4 border-b border-white/5">
-                    <span class="text-gray-500 font-medium">Nome Registrado</span>
+                    <span class="text-gray-500 font-medium">Nome do Grupo</span>
                     <span class="font-bold text-purple-400" id="full-name">---</span>
-                </div>
-                <div class="flex justify-between items-center py-4">
-                    <span class="text-gray-500 font-medium">Conexão RDP</span>
-                    <span class="text-green-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Estável</span>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        // Preencher dados da sessão
+        // Preencher dados
         document.getElementById('user-display-name').innerText = user.nome || 'Grupo';
         document.getElementById('full-name').innerText = user.nome || 'Nenhum nome definido';
         document.getElementById('user-display-id').innerText = `ID: ${user.id}`;
@@ -122,10 +115,10 @@
         const dataFormatada = new Date(user.expira).toLocaleDateString('pt-BR');
         document.getElementById('data-expira').innerText = dataFormatada;
 
-        // Timer de Expiração
+        // Timer de expiração
         function startTimer() {
             const expiraMs = user.expira;
-            setInterval(() => {
+            const update = () => {
                 const agora = Date.now();
                 const diff = expiraMs - agora;
 
@@ -139,13 +132,10 @@
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
                 document.getElementById('timer').innerText = `${d}d ${h}h ${m}m`;
-            }, 60000);
+            };
             
-            // Primeira execução imediata
-            const d = Math.floor((expiraMs - Date.now()) / (1000 * 60 * 60 * 24));
-            const h = Math.floor(((expiraMs - Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor(((expiraMs - Date.now()) % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('timer').innerText = `${d}d ${h}h ${m}m`;
+            update();
+            setInterval(update, 60000);
         }
         startTimer();
 
