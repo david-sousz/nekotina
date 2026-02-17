@@ -3,27 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nekotina - Painel de Controle</title>
+    <title>Nekotina - Dashboard Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; }
-        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
         .sidebar { background: #080808; border-right: 1px solid #151515; }
-        .feature-card { transition: all 0.3s ease; }
-        .feature-card:hover { border-color: #9d4edd; transform: translateY(-3px); background: rgba(157, 78, 221, 0.05); }
-        /* Toggle Switch Custom */
+        .feature-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .feature-card:hover { border-color: #9d4edd; transform: translateY(-4px); background: rgba(157, 78, 221, 0.03); }
+        
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #9d4edd; }
-        input:checked + .slider:before { transform: translateX(22px); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; transition: .4s; border-radius: 34px; border: 1px solid rgba(255,255,255,0.05); }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: #666; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #9d4edd; border-color: #c77dff; }
+        input:checked + .slider:before { transform: translateX(22px); background-color: white; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row min-h-screen">
+<body class="flex flex-col md:flex-row min-h-screen overflow-hidden">
 
     <script>
         const session = localStorage.getItem('nekotina_session');
@@ -35,168 +39,226 @@
     <!-- Sidebar -->
     <aside class="w-full md:w-72 sidebar p-8 flex flex-col z-20">
         <div class="flex items-center gap-3 mb-12">
-            <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-                <i data-lucide="zap" class="text-white w-6 h-6"></i>
+            <div class="w-12 h-12 bg-gradient-to-tr from-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <i data-lucide="zap" class="text-white w-7 h-7"></i>
             </div>
-            <span class="text-xl font-bold tracking-tight">Nekotina</span>
+            <span class="text-2xl font-black tracking-tighter">NEKOTINA</span>
         </div>
-        <nav class="space-y-2 flex-1">
-            <a href="#" class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 text-purple-400 font-bold">
+        <nav class="space-y-3 flex-1">
+            <button onclick="showSection('dashboard')" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 text-purple-400 font-bold transition-all">
                 <i data-lucide="layout-dashboard"></i> Dashboard
-            </a>
-            <a href="#" onclick="openModalPix()" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-amber-500 hover:bg-amber-500/10 transition-all font-bold">
-                <i data-lucide="gem"></i> Renovar Plano
-            </a>
+            </button>
+            <button onclick="showSection('automsg')" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-500 hover:bg-white/5 hover:text-white transition-all font-bold">
+                <i data-lucide="message-square"></i> Auto Mensagens
+            </button>
+            <button onclick="openModalPix()" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-amber-500 hover:bg-amber-500/10 transition-all font-bold">
+                <i data-lucide="gem"></i> Planos / Pix
+            </button>
         </nav>
-        <div class="mt-auto border-t border-white/5 pt-6">
-            <button onclick="logout()" class="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-red-500 hover:bg-red-500/10 transition-all">
+        <div class="mt-auto border-t border-white/5 pt-6 space-y-4">
+            <div class="bg-white/5 p-4 rounded-2xl">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Sessão Ativa</p>
+                <p id="timer" class="text-lg font-mono font-bold text-purple-500 mt-1">00d 00h 00m</p>
+            </div>
+            <button onclick="logout()" class="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-red-500 hover:bg-red-500/10 transition-all font-bold">
                 <i data-lucide="log-out"></i> Sair
             </button>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-12 overflow-y-auto">
-        <header class="mb-10 flex justify-between items-end">
-            <div>
-                <h2 class="text-3xl font-extrabold text-white">Painel: <span class="text-purple-500" id="group-name">Grupo</span></h2>
-                <p class="text-gray-500 text-sm mt-1" id="group-id">ID: ...</p>
-            </div>
-            <div class="text-right">
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tempo Restante</p>
-                <p id="timer" class="text-xl font-mono font-bold text-purple-500">00d 00h 00m</p>
-            </div>
-        </header>
+    <!-- Main -->
+    <main class="flex-1 p-6 md:p-12 overflow-y-auto relative">
+        <!-- Dashboard Section -->
+        <div id="section-dashboard">
+            <header class="mb-10">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-purple-500/10 text-purple-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-purple-500/20">Premium RDP</span>
+                </div>
+                <h2 class="text-4xl font-extrabold text-white">Olá, <span id="group-name">Grupo</span></h2>
+                <p class="text-gray-500 text-sm mt-1" id="group-id">...</p>
+            </header>
 
-        <!-- Features Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="features-grid">
-            <!-- Cards gerados via JS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="features-grid">
+                <!-- Cards via JS -->
+            </div>
+        </div>
+
+        <!-- AutoMsg Section -->
+        <div id="section-automsg" class="hidden">
+            <header class="mb-10 flex justify-between items-center">
+                <div>
+                    <h2 class="text-4xl font-extrabold text-white">Auto Mensagens</h2>
+                    <p class="text-gray-500 text-sm mt-1">Gerencie anúncios automáticos</p>
+                </div>
+                <button onclick="addAutoMsg()" class="bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Nova Mensagem
+                </button>
+            </header>
+            <div id="automsg-list" class="space-y-4">
+                <!-- Listagem via JS -->
+            </div>
         </div>
     </main>
 
     <script>
-        // Definição das funcionalidades baseada no seu PHP
         const cards = [
-            { id: 'antilink', t: 'Anti-Link', d: 'Bloqueia links externos', i: 'link', c: 'amber' },
-            { id: 'antiporno', t: 'Anti-Pornô', d: 'Detecta mídia +18', i: 'shield-alert', c: 'red' },
-            { id: 'antiflood', t: 'Anti-Flood', d: 'Bloqueia spam de msgs', i: 'zap', c: 'purple', cfg: true },
-            { id: 'welcome', t: 'Boas-Vindas', d: 'Saudação automática', i: 'door-open', c: 'green', cfg: true },
-            { id: 'autohorarios', t: 'Auto Horários', d: 'Minutos pagantes auto', i: 'calendar', c: 'blue' },
-            { id: 'antifake', t: 'Anti-Fake', d: 'Bloqueia números fakes', i: 'user-x', c: 'gray' },
-            { id: 'transcrever', t: 'Transcrever', d: 'Áudio para texto', i: 'mic', c: 'pink' },
-            { id: 'open_close', t: 'Auto Abrir', d: 'Controle de horários', i: 'clock', c: 'cyan', cfg: true }
+            { id: 'antilink', t: 'Anti-Link', d: 'Bloqueio de links', i: 'link', c: 'amber' },
+            { id: 'antiporno', t: 'Anti-Pornô', d: 'Detecção +18', i: 'shield-alert', c: 'red' },
+            { id: 'antiflood', t: 'Anti-Flood', d: 'Bloqueio de Spam', i: 'zap', c: 'purple', cfg: true },
+            { id: 'welcome', t: 'Boas-Vindas', d: 'Saudação de entrada', i: 'door-open', c: 'green', cfg: true },
+            { id: 'antimedia', t: 'Anti-Mídia', d: 'Bloqueio seletivo', i: 'image', c: 'blue', cfg: true },
+            { id: 'antifake', t: 'Anti-Fake', d: 'Bloqueia números fake', i: 'user-x', c: 'gray' },
+            { id: 'open_close', t: 'Auto Abrir', d: 'Controle de horários', i: 'clock', c: 'cyan', cfg: true },
+            { id: 'autohorarios', t: 'Auto Horários', d: 'Minutos pagantes', i: 'calendar', c: 'orange' }
         ];
 
-        async function initDashboard() {
+        async function init() {
             document.getElementById('group-name').innerText = user.nome || 'Grupo';
             document.getElementById('group-id').innerText = user.id;
 
-            // Busca status atual do servidor
-            const response = await fetch(API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                body: JSON.stringify({ acao: 'get_config', id: user.id })
-            });
-            const config = await response.json();
-            
-            renderCards(config.status);
-            startTimer(user.expira);
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify({ acao: 'get_config', id: user.id })
+                });
+                const data = await res.json();
+                
+                renderFeatures(data.status);
+                renderAutoMsgs(data.autoMsgs);
+                startTimer(user.expira);
+            } catch (e) {
+                console.error("Erro ao carregar dados:", e);
+                Swal.fire('Erro', 'Não foi possível conectar ao servidor ponte.', 'error');
+            }
             lucide.createIcons();
         }
 
-        function renderCards(status) {
+        function renderFeatures(status) {
             const grid = document.getElementById('features-grid');
             grid.innerHTML = cards.map(c => {
-                const isAtivo = status[c.id] === true;
+                const ativo = status && status[c.id] === true;
                 return `
-                <div class="glass-card p-6 rounded-[28px] feature-card flex flex-col justify-between h-48">
-                    <div class="flex justify-between items-start">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-${c.c}-500">
+                <div class="glass-card p-6 rounded-[32px] feature-card border border-white/5 flex flex-col justify-between h-52 relative overflow-hidden">
+                    <div class="flex justify-between items-start z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-${c.c}-500/10 flex items-center justify-center text-${c.c}-500">
                             <i data-lucide="${c.i}"></i>
                         </div>
-                        ${c.cfg ? `<button onclick="openConfig('${c.id}')" class="text-gray-600 hover:text-white transition-colors"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
+                        ${c.cfg ? `<button onclick="openConfig('${c.id}')" class="p-2 text-gray-600 hover:text-white transition-colors"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
                     </div>
-                    <div>
-                        <h4 class="font-bold text-sm mb-1">${c.t}</h4>
-                        <p class="text-[10px] text-gray-500 leading-tight uppercase tracking-wider">${c.d}</p>
+                    <div class="z-10">
+                        <h4 class="font-bold text-base text-white">${c.t}</h4>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">${c.d}</p>
                     </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <span class="text-[10px] font-bold ${isAtivo ? 'text-purple-400' : 'text-gray-600'}">${isAtivo ? 'ATIVADO' : 'DESATIVADO'}</span>
+                    <div class="flex items-center justify-between mt-4 z-10">
+                        <span class="text-[10px] font-black ${ativo ? 'text-purple-400' : 'text-gray-700'}">${ativo ? 'LIGADO' : 'DESLIGADO'}</span>
                         <label class="switch">
-                            <input type="checkbox" onchange="toggleFeature('${c.id}', this)" ${isAtivo ? 'checked' : ''}>
+                            <input type="checkbox" onchange="toggleFeature('${c.id}', this)" ${ativo ? 'checked' : ''}>
                             <span class="slider"></span>
                         </label>
                     </div>
-                </div>
-                `;
+                    <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-${c.c}-500/5 rounded-full blur-2xl"></div>
+                </div>`;
             }).join('');
+            lucide.createIcons();
+        }
+
+        function renderAutoMsgs(msgs) {
+            const list = document.getElementById('automsg-list');
+            if(!msgs || msgs.length === 0) {
+                list.innerHTML = `<div class="glass-card p-12 text-center text-gray-600 rounded-[32px]">Nenhuma mensagem automática configurada.</div>`;
+                return;
+            }
+            list.innerHTML = msgs.map((m, i) => `
+                <div class="glass-card p-6 rounded-3xl flex items-center justify-between border border-white/5">
+                    <div class="flex items-center gap-6">
+                        <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-purple-400">
+                            <i data-lucide="clock" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-bold">${m.texto.substring(0, 50)}${m.texto.length > 50 ? '...' : ''}</p>
+                            <p class="text-xs text-gray-500">Intervalo: ${m.tempo} min | ${m.mencionarTodos ? 'Menciona Todos' : 'Sem menção'}</p>
+                        </div>
+                    </div>
+                    <button onclick="delAutoMsg(${i})" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
         async function toggleFeature(id, el) {
             const estado = el.checked ? 1 : 0;
-            try {
-                await fetch(API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                    body: JSON.stringify({ acao: 'toggle', id: user.id, funcao: id, estado: estado })
-                });
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${id} atualizado!`, showConfirmButton: false, timer: 1500, background: '#111', color: '#fff' });
-            } catch (e) {
-                el.checked = !el.checked;
-            }
-        }
-
-        function openConfig(id) {
-            if(id === 'welcome') {
-                Swal.fire({
-                    title: 'Configurar Boas-Vindas',
-                    input: 'textarea',
-                    inputLabel: 'Use #user# para o nome e #group# para o grupo',
-                    inputPlaceholder: 'Olá #user#, bem-vindo...',
-                    background: '#0a0a0a', color: '#fff',
-                    confirmButtonColor: '#9d4edd',
-                    showCancelButton: true
-                }).then(res => {
-                    if(res.value) salvarConfigComplexa('welcome', { texto: res.value });
-                });
-            }
-            if(id === 'antiflood') {
-                Swal.fire({
-                    title: 'Ação do Anti-Flood',
-                    input: 'select',
-                    inputOptions: { 'ban': 'Banir Usuário', 'warn': 'Apenas deletar' },
-                    background: '#0a0a0a', color: '#fff'
-                }).then(res => {
-                    if(res.value) salvarConfigComplexa('flood', { action: res.value });
-                });
-            }
-        }
-
-        async function salvarConfigComplexa(tipo, config) {
             await fetch(API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                body: JSON.stringify({ acao: 'save_complex', id: user.id, tipo, config })
+                body: JSON.stringify({ acao: 'toggle', id: user.id, funcao: id, estado: estado })
             });
-            Swal.fire('Salvo!', '', 'success');
+            init(); // Recarrega status
+        }
+
+        function showSection(name) {
+            document.getElementById('section-dashboard').classList.toggle('hidden', name !== 'dashboard');
+            document.getElementById('section-automsg').classList.toggle('hidden', name !== 'automsg');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('text-purple-400', 'bg-white/5'));
+        }
+
+        async function addAutoMsg() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Nova Auto Mensagem',
+                background: '#0a0a0a', color: '#fff',
+                html: `
+                    <textarea id="swal-text" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white mb-4" placeholder="Texto da mensagem..."></textarea>
+                    <input id="swal-time" type="number" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white mb-4" placeholder="Tempo (minutos)">
+                    <div class="flex items-center gap-2">
+                        <input id="swal-mention" type="checkbox"> <label>Mencionar @todos?</label>
+                    </div>
+                `,
+                focusConfirm: false,
+                preConfirm: () => ({
+                    texto: document.getElementById('swal-text').value,
+                    tempo: document.getElementById('swal-time').value,
+                    mencionarTodos: document.getElementById('swal-mention').checked
+                })
+            });
+
+            if (formValues) {
+                await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify({ acao: 'add_automsg', id: user.id, msg: formValues })
+                });
+                init();
+            }
+        }
+
+        async function delAutoMsg(index) {
+            await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ acao: 'del_automsg', id: user.id, index: index })
+            });
+            init();
         }
 
         function startTimer(exp) {
-            const timer = document.getElementById('timer');
-            setInterval(() => {
-                const diff = exp - Date.now();
-                if(diff <= 0) return timer.innerText = "EXPIRADO";
-                const d = Math.floor(diff / 86400000);
-                const h = Math.floor((diff % 86400000) / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                timer.innerText = `${d}d ${h}h ${m}m`;
-            }, 1000);
+            const t = document.getElementById('timer');
+            const update = () => {
+                const d = exp - Date.now();
+                if(d <= 0) return t.innerText = "EXPIRADO";
+                const dias = Math.floor(d / 86400000);
+                const h = Math.floor((d % 86400000) / 3600000);
+                const m = Math.floor((d % 3600000) / 60000);
+                t.innerText = `${dias}d ${h}h ${m}m`;
+            };
+            update();
+            setInterval(update, 60000);
         }
 
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
-        initDashboard();
+        window.onload = init;
     </script>
 </body>
 </html>
