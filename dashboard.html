@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Usuário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-200 h-screen flex overflow-hidden">
+
+    <script>
+        const usuario = localStorage.getItem('usuario_logado');
+        if (!usuario) {
+            window.location.href = 'index.html'; // Chuta de volta pro login
+        }
+    </script>
+
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 p-6 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center gap-3 mb-10">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <i data-lucide="layout-dashboard" class="text-white w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-bold text-white">RDP System</h1>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-600/10 text-blue-400 rounded-lg border border-blue-600/20">
+                    <i data-lucide="home" class="w-5 h-5"></i> Início
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-lg transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Configurações
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-lg transition-colors">
+                    <i data-lucide="file-text" class="w-5 h-5"></i> Arquivos
+                </a>
+            </nav>
+        </div>
+
+        <button onclick="logout()" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors w-full">
+            <i data-lucide="log-out" class="w-5 h-5"></i> Sair
+        </button>
+    </aside>
+
+    <main class="flex-1 p-10 overflow-auto relative">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-white">Bem-vindo, <span id="nomeUser" class="text-blue-500">Usuário</span>!</h2>
+                <p class="text-slate-400 mt-1">Aqui está o status da sua conexão RDP.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-slate-800 p-2 rounded-full border border-slate-700">
+                    <i data-lucide="bell" class="w-5 h-5 text-slate-400"></i>
+                </div>
+                <div class="w-10 h-10 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-full border-2 border-slate-900 shadow-lg"></div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-blue-500/30 transition-colors">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-emerald-500/10 p-3 rounded-lg">
+                        <i data-lucide="wifi" class="w-6 h-6 text-emerald-500"></i>
+                    </div>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">Online</span>
+                </div>
+                <h3 class="text-slate-400 text-sm font-medium">Status do Servidor</h3>
+                <p class="text-2xl font-bold text-white mt-1">Conectado</p>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-blue-500/30 transition-colors">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-blue-500/10 p-3 rounded-lg">
+                        <i data-lucide="hard-drive" class="w-6 h-6 text-blue-500"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-400 text-sm font-medium">Latência</h3>
+                <p class="text-2xl font-bold text-white mt-1">24ms</p>
+            </div>
+
+             <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-blue-500/30 transition-colors">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-purple-500/10 p-3 rounded-lg">
+                        <i data-lucide="cpu" class="w-6 h-6 text-purple-500"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-400 text-sm font-medium">Sessão Ativa</h3>
+                <p class="text-2xl font-bold text-white mt-1">00:45:12</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        
+        // Coloca o nome do usuário na tela
+        document.getElementById('nomeUser').innerText = localStorage.getItem('usuario_logado') || 'Visitante';
+
+        function logout() {
+            localStorage.removeItem('usuario_logado');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
