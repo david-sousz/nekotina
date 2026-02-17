@@ -3,148 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nekotina - Dashboard</title>
+    <title>Nekotina - Painel de Controle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; }
         .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
         .sidebar { background: #080808; border-right: 1px solid #151515; }
+        .feature-card { transition: all 0.3s ease; }
+        .feature-card:hover { border-color: #9d4edd; transform: translateY(-3px); background: rgba(157, 78, 221, 0.05); }
+        /* Toggle Switch Custom */
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #9d4edd; }
+        input:checked + .slider:before { transform: translateX(22px); }
     </style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen">
 
-    <!-- Proteção de Rota -->
     <script>
         const session = localStorage.getItem('nekotina_session');
-        if (!session) {
-            window.location.href = 'index.html';
-        }
+        if (!session) window.location.href = 'index.html';
         const user = JSON.parse(session);
+        const API = 'https://meristic-unironical-gail.ngrok-free.dev';
     </script>
 
     <!-- Sidebar -->
     <aside class="w-full md:w-72 sidebar p-8 flex flex-col z-20">
-        <div class="flex items-center gap-3 mb-12 px-2">
-            <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-600/20">
+        <div class="flex items-center gap-3 mb-12">
+            <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
                 <i data-lucide="zap" class="text-white w-6 h-6"></i>
             </div>
             <span class="text-xl font-bold tracking-tight">Nekotina</span>
         </div>
-
         <nav class="space-y-2 flex-1">
             <a href="#" class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 text-purple-400 font-bold">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard
+                <i data-lucide="layout-dashboard"></i> Dashboard
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
-                <i data-lucide="settings" class="w-5 h-5"></i> Configurações
+            <a href="#" onclick="openModalPix()" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-amber-500 hover:bg-amber-500/10 transition-all font-bold">
+                <i data-lucide="gem"></i> Renovar Plano
             </a>
         </nav>
-
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <div class="bg-white/5 p-4 rounded-2xl mb-4">
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tempo de Plano</p>
-                <p id="timer" class="text-lg font-mono font-bold text-purple-500 mt-1">Calculando...</p>
-            </div>
-            <button onclick="logout()" class="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-red-500 hover:bg-red-500/10 transition-all font-semibold">
-                <i data-lucide="log-out" class="w-5 h-5"></i> Sair
+        <div class="mt-auto border-t border-white/5 pt-6">
+            <button onclick="logout()" class="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-red-500 hover:bg-red-500/10 transition-all">
+                <i data-lucide="log-out"></i> Sair
             </button>
         </div>
     </aside>
 
-    <!-- Conteúdo -->
+    <!-- Main Content -->
     <main class="flex-1 p-6 md:p-12 overflow-y-auto">
-        <header class="mb-12">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="bg-green-500/10 text-green-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-green-500/20">Ativo</span>
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-extrabold text-white">Painel: <span class="text-purple-500" id="group-name">Grupo</span></h2>
+                <p class="text-gray-500 text-sm mt-1" id="group-id">ID: ...</p>
             </div>
-            <h2 class="text-4xl font-extrabold text-white">Bem-vindo, <span id="user-display-name" class="text-purple-500">Grupo</span>!</h2>
-            <p id="user-display-id" class="text-gray-500 text-sm mt-2 font-mono">ID: ...</p>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tempo Restante</p>
+                <p id="timer" class="text-xl font-mono font-bold text-purple-500">00d 00h 00m</p>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="glass-card p-8 rounded-[32px]">
-                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 mb-6">
-                    <i data-lucide="credit-card"></i>
-                </div>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Plano Ativo</p>
-                <h3 id="plano-txt" class="text-2xl font-bold mt-1">...</h3>
-            </div>
-            <div class="glass-card p-8 rounded-[32px]">
-                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6">
-                    <i data-lucide="activity"></i>
-                </div>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Status Bot</p>
-                <h3 class="text-2xl font-bold mt-1 text-green-500">Operacional</h3>
-            </div>
-            <div class="glass-card p-8 rounded-[32px]">
-                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-6">
-                    <i data-lucide="clock"></i>
-                </div>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Expiração</p>
-                <h3 id="data-expira" class="text-lg font-bold mt-1">--/--/----</h3>
-            </div>
-        </div>
-
-        <div class="mt-10 glass-card p-10 rounded-[40px]">
-            <h4 class="text-xl font-bold mb-8 flex items-center gap-3">
-                <i data-lucide="database" class="text-purple-500 w-5 h-5"></i> Dados do Grupo
-            </h4>
-            <div class="space-y-6">
-                <div class="flex justify-between items-center py-4 border-b border-white/5">
-                    <span class="text-gray-500 font-medium">ID do Grupo</span>
-                    <span class="font-mono text-sm bg-white/5 px-3 py-1 rounded-lg" id="full-id">---</span>
-                </div>
-                <div class="flex justify-between items-center py-4 border-b border-white/5">
-                    <span class="text-gray-500 font-medium">Nome do Grupo</span>
-                    <span class="font-bold text-purple-400" id="full-name">---</span>
-                </div>
-            </div>
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="features-grid">
+            <!-- Cards gerados via JS -->
         </div>
     </main>
 
     <script>
-        // Preencher dados
-        document.getElementById('user-display-name').innerText = user.nome || 'Grupo';
-        document.getElementById('full-name').innerText = user.nome || 'Nenhum nome definido';
-        document.getElementById('user-display-id').innerText = `ID: ${user.id}`;
-        document.getElementById('full-id').innerText = user.id;
-        document.getElementById('plano-txt').innerText = user.plano || 'Padrão';
-        
-        const dataFormatada = new Date(user.expira).toLocaleDateString('pt-BR');
-        document.getElementById('data-expira').innerText = dataFormatada;
+        // Definição das funcionalidades baseada no seu PHP
+        const cards = [
+            { id: 'antilink', t: 'Anti-Link', d: 'Bloqueia links externos', i: 'link', c: 'amber' },
+            { id: 'antiporno', t: 'Anti-Pornô', d: 'Detecta mídia +18', i: 'shield-alert', c: 'red' },
+            { id: 'antiflood', t: 'Anti-Flood', d: 'Bloqueia spam de msgs', i: 'zap', c: 'purple', cfg: true },
+            { id: 'welcome', t: 'Boas-Vindas', d: 'Saudação automática', i: 'door-open', c: 'green', cfg: true },
+            { id: 'autohorarios', t: 'Auto Horários', d: 'Minutos pagantes auto', i: 'calendar', c: 'blue' },
+            { id: 'antifake', t: 'Anti-Fake', d: 'Bloqueia números fakes', i: 'user-x', c: 'gray' },
+            { id: 'transcrever', t: 'Transcrever', d: 'Áudio para texto', i: 'mic', c: 'pink' },
+            { id: 'open_close', t: 'Auto Abrir', d: 'Controle de horários', i: 'clock', c: 'cyan', cfg: true }
+        ];
 
-        // Timer de expiração
-        function startTimer() {
-            const expiraMs = user.expira;
-            const update = () => {
-                const agora = Date.now();
-                const diff = expiraMs - agora;
+        async function initDashboard() {
+            document.getElementById('group-name').innerText = user.nome || 'Grupo';
+            document.getElementById('group-id').innerText = user.id;
 
-                if (diff <= 0) {
-                    document.getElementById('timer').innerText = "EXPIRADO";
-                    return;
-                }
-
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-                document.getElementById('timer').innerText = `${d}d ${h}h ${m}m`;
-            };
+            // Busca status atual do servidor
+            const response = await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ acao: 'get_config', id: user.id })
+            });
+            const config = await response.json();
             
-            update();
-            setInterval(update, 60000);
-        }
-        startTimer();
-
-        function logout() {
-            localStorage.removeItem('nekotina_session');
-            window.location.href = 'index.html';
+            renderCards(config.status);
+            startTimer(user.expira);
+            lucide.createIcons();
         }
 
-        lucide.createIcons();
+        function renderCards(status) {
+            const grid = document.getElementById('features-grid');
+            grid.innerHTML = cards.map(c => {
+                const isAtivo = status[c.id] === true;
+                return `
+                <div class="glass-card p-6 rounded-[28px] feature-card flex flex-col justify-between h-48">
+                    <div class="flex justify-between items-start">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-${c.c}-500">
+                            <i data-lucide="${c.i}"></i>
+                        </div>
+                        ${c.cfg ? `<button onclick="openConfig('${c.id}')" class="text-gray-600 hover:text-white transition-colors"><i data-lucide="settings" class="w-4 h-4"></i></button>` : ''}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm mb-1">${c.t}</h4>
+                        <p class="text-[10px] text-gray-500 leading-tight uppercase tracking-wider">${c.d}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <span class="text-[10px] font-bold ${isAtivo ? 'text-purple-400' : 'text-gray-600'}">${isAtivo ? 'ATIVADO' : 'DESATIVADO'}</span>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleFeature('${c.id}', this)" ${isAtivo ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        async function toggleFeature(id, el) {
+            const estado = el.checked ? 1 : 0;
+            try {
+                await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify({ acao: 'toggle', id: user.id, funcao: id, estado: estado })
+                });
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${id} atualizado!`, showConfirmButton: false, timer: 1500, background: '#111', color: '#fff' });
+            } catch (e) {
+                el.checked = !el.checked;
+            }
+        }
+
+        function openConfig(id) {
+            if(id === 'welcome') {
+                Swal.fire({
+                    title: 'Configurar Boas-Vindas',
+                    input: 'textarea',
+                    inputLabel: 'Use #user# para o nome e #group# para o grupo',
+                    inputPlaceholder: 'Olá #user#, bem-vindo...',
+                    background: '#0a0a0a', color: '#fff',
+                    confirmButtonColor: '#9d4edd',
+                    showCancelButton: true
+                }).then(res => {
+                    if(res.value) salvarConfigComplexa('welcome', { texto: res.value });
+                });
+            }
+            if(id === 'antiflood') {
+                Swal.fire({
+                    title: 'Ação do Anti-Flood',
+                    input: 'select',
+                    inputOptions: { 'ban': 'Banir Usuário', 'warn': 'Apenas deletar' },
+                    background: '#0a0a0a', color: '#fff'
+                }).then(res => {
+                    if(res.value) salvarConfigComplexa('flood', { action: res.value });
+                });
+            }
+        }
+
+        async function salvarConfigComplexa(tipo, config) {
+            await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ acao: 'save_complex', id: user.id, tipo, config })
+            });
+            Swal.fire('Salvo!', '', 'success');
+        }
+
+        function startTimer(exp) {
+            const timer = document.getElementById('timer');
+            setInterval(() => {
+                const diff = exp - Date.now();
+                if(diff <= 0) return timer.innerText = "EXPIRADO";
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                timer.innerText = `${d}d ${h}h ${m}m`;
+            }, 1000);
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+        initDashboard();
     </script>
 </body>
 </html>
