@@ -3,36 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nekotina - Acesso Facilitado</title>
+    <title>Nekotina - Acesso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; }
         .glass { background: rgba(15, 7, 25, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .input-box:focus-within { border-color: #9d4edd; box-shadow: 0 0 15px rgba(157, 78, 221, 0.2); }
-        select { color-scheme: dark; }
-        option { background: #1a1a2e; color: white; }
+        select option { background: #0f0f1a; color: white; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-4">
     <div class="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(88,28,135,0.15),transparent)] z-[-1]"></div>
 
     <main class="glass w-full max-w-[420px] rounded-[32px] p-10 shadow-2xl animate-in fade-in zoom-in duration-500">
         <div class="text-center mb-10">
             <div class="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/20">
-                <i data-lucide="users" class="text-white w-8 h-8"></i>
+                <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight">Nekotina Portal</h1>
-            <p class="text-gray-500 text-sm mt-1">Selecione seu grupo para acessar</p>
+            <h1 class="text-2xl font-bold tracking-tight">Nekotina System</h1>
+            <p class="text-gray-400 text-sm mt-1">Selecione seu grupo para entrar</p>
         </div>
 
         <div class="space-y-4">
-            <!-- LISTA DE SELEÇÃO DE GRUPOS -->
             <div class="space-y-1">
-                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Selecione o Grupo</label>
+                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Grupo Registrado</label>
                 <div class="input-box flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-1 transition-all">
-                    <i data-lucide="list" class="w-4 h-4 text-gray-600 mr-3"></i>
+                    <i data-lucide="users" class="w-4 h-4 text-gray-600 mr-3"></i>
                     <select id="group-select" class="bg-transparent border-none outline-none text-sm w-full py-3 cursor-pointer">
                         <option value="" disabled selected>Carregando grupos...</option>
                     </select>
@@ -47,13 +45,13 @@
                 </div>
             </div>
 
-            <div class="bg-white/[0.02] border border-white/5 rounded-xl p-4 flex items-center justify-between">
+            <div class="bg-white/[0.02] border border-white/5 rounded-xl p-4 flex items-center justify-between mt-4">
                 <span id="captcha-txt" class="text-purple-400 font-mono text-sm font-bold"></span>
-                <input type="number" id="captcha-in" class="w-16 bg-white/5 border border-white/10 rounded-lg text-center py-1 text-sm">
+                <input type="number" id="captcha-in" class="w-16 bg-white/5 border border-white/10 rounded-lg text-center py-1 text-sm outline-none">
             </div>
 
-            <button onclick="handleLogin()" id="btn-login" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-purple-600/20">
-                Entrar no Painel
+            <button onclick="handleLogin()" id="btn-login" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-purple-600/20 active:scale-95">
+                Acessar Painel
             </button>
         </div>
         
@@ -64,7 +62,6 @@
         const API = 'https://meristic-unironical-gail.ngrok-free.dev';
         let n1, n2;
 
-        // Função para carregar os grupos na lista
         async function loadGroups() {
             const select = document.getElementById('group-select');
             try {
@@ -73,18 +70,20 @@
                 });
                 const grupos = await response.json();
                 
-                select.innerHTML = '<option value="" disabled selected>Escolha um grupo abaixo</option>';
-                
+                if (grupos.length === 0) {
+                    select.innerHTML = '<option value="" disabled>Nenhum grupo encontrado</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="" disabled selected>Escolha o seu grupo</option>';
                 grupos.forEach(g => {
                     const option = document.createElement('option');
                     option.value = g.id;
-                    // Mostra o nome se tiver, senão mostra o ID
                     option.textContent = g.nome ? `${g.nome} (${g.id.substring(0,8)}...)` : g.id;
                     select.appendChild(option);
                 });
             } catch (err) {
-                select.innerHTML = '<option value="" disabled>Erro ao carregar grupos</option>';
-                console.error("Erro ao buscar grupos:", err);
+                select.innerHTML = '<option value="" disabled>Erro ao carregar lista</option>';
             }
         }
 
@@ -103,19 +102,19 @@
             const btn = document.getElementById('btn-login');
 
             if (!id) {
-                status.innerText = "Selecione um grupo primeiro.";
-                status.className = "text-center text-xs mt-6 h-4 text-red-500";
+                status.innerText = "Selecione um grupo!";
+                status.className = "text-center text-xs mt-6 h-4 text-amber-500";
                 return;
             }
 
             if (ans !== (n1 + n2)) {
-                status.innerText = "Captcha incorreto!";
+                status.innerText = "Soma incorreta!";
                 status.className = "text-center text-xs mt-6 h-4 text-red-500";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Autenticando...";
+            btn.innerText = "Entrando...";
 
             try {
                 const response = await fetch(API, {
@@ -127,27 +126,23 @@
                 const res = await response.json();
 
                 if (res.sucesso) {
-                    status.innerText = "Sucesso! Redirecionando...";
+                    status.innerText = "Sucesso!";
                     status.className = "text-center text-xs mt-6 h-4 text-green-500";
                     localStorage.setItem('nekotina_session', JSON.stringify(res.user));
-                    setTimeout(() => window.location.href = 'dashboard.html', 800);
+                    setTimeout(() => window.location.href = 'dashboard.html', 500);
                 } else {
                     status.innerText = res.erro || "Senha incorreta.";
                     status.className = "text-center text-xs mt-6 h-4 text-red-500";
                     btn.disabled = false;
-                    btn.innerText = "Entrar no Painel";
+                    btn.innerText = "Acessar Painel";
                 }
             } catch (err) {
-                status.innerText = "Falha ao conectar com o servidor.";
+                status.innerText = "Erro de conexão com o servidor.";
                 btn.disabled = false;
-                btn.innerText = "Entrar no Painel";
             }
         }
 
-        window.onload = () => {
-            loadGroups();
-            initCaptcha();
-        };
+        window.onload = () => { loadGroups(); initCaptcha(); };
         lucide.createIcons();
     </script>
 </body>
